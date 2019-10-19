@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<style type="text/css">
+			/**{
+				margin:0px;
+				padding:0px;
+			}*/
+			.gameuser{
+				width: 460px;
+				height: 700px;
+				margin: auto;
+				overflow: hidden;
+				background: url(img/bg0.jpg);
+			}
+			.gameuser>div{
+				width: 300px;
+				height: 500px;
+				margin:100px auto;
+				overflow: hidden;
+			}
+			.gameuser>div>input{
+				width: 180px;
+				height: 50px;
+				display: block;
+				margin:60px auto;
+				font:bold 24px "微软雅黑";
+			}
+			.gameuser>div>input:nth-of-type(1){
+				background: rgba(66,201,20,0.4);
+			}
+			.gameuser>div>input:nth-of-type(2){
+				background: rgba(66,201,220,0.6);
+			}
+			.gameuser>div>input:nth-of-type(3){
+				background: rgba(255,251,20,0.7);
+			}
+			.gameuser>div>input:nth-of-type(4){
+				background: rgba(255,20,20,1);
+			}
+			.bgji{
+				width: 460px;
+				height: 700px;
+				overflow:hidden;
+				position: relative;
+				margin: auto;
+				z-index: -1;
+				display: none;
+				
+			}
+			.bg{
+				background: url(img/bg1.jpg);
+				background-size:100% 100%;
+				width: 460px;
+				height: 700px;
+			}
+			.bg1{
+				background: url(img/bg2.jpg);
+				background-size:100% 100%;
+				width: 460px;
+				height: 700px;
+			}
+			.bg2{
+				background: url(img/bg3.jpg);
+				background-size:100% 100%;
+				width: 460px;
+				height: 700px;
+			}
+			.bg3{
+				background: url(img/bg4.jpg);
+				background-size:100% 100%;
+				width: 460px;
+				height: 700px;
+			}
+			.bgimg{
+				width: 460px;
+				height: 700px;
+				overflow:hidden;
+				position: absolute;
+				margin: auto;
+				z-index: -1;
+			}
+			.diji{
+				background: url(img/enemy_small.png);
+				background-size:100% 100%;
+				width:60px;
+				height:60px;
+				/*border:1px solid red;*/
+			}
+			.bul{
+				background: url(img/dijizidan.png);
+				background-size:100% 100%;
+				width:14px;
+				height:25px;
+			}
+			.diji1{
+				background: url(img/enemy_big.png);
+				background-size:100% 100%;
+				width:80px;
+				height:80px;
+				/*border:1px solid red;*/
+			}
+			.dijiboss{
+				background: url(img/enemy_big.png);
+				background-size:100% 100%;
+				width:160px;
+				height:160px;
+				/*border:1px solid red;*/
+			}
+			.dijidie{
+				background: url(img/boom_small.png);
+				background-size:100% 100%;
+			}
+			.zijia{
+				background: url(img/plane_0.png);
+				background-size:100% 100%;
+			}
+			/*自己的飞机*/
+			.zijiadie{
+				background: url(img/boom_big.png);
+				background-size:100% 100%;
+			}
+			.zidan{
+				width:14px;
+				height:14px;
+				/*border:1px solid red;*/
+				background: url(img/fire.png);
+				background-size:100% 100%;
+			}
+			.zidan1{
+				width:38px;
+				height:28px;
+				/*border:1px solid red;*/
+				background: url(img/fire1.png);
+				background-size:100% 100%;
+			}
+			.gift1{
+				border:2px solid blue;
+				border-radius: 50%;
+				width:30px;
+				height:30px;
+				color:blue;
+				font:bold 14px/30px "微软雅黑";
+				text-align: center;
+				position: absolute;
+			}
+			.gift2{
+				border:2px solid red;
+				border-radius: 50%;
+				width:30px;
+				height:30px;
+				color:red;
+				font:bold 14px/30px "微软雅黑";
+				text-align: center;
+				position: absolute;
+			}
+			/*@keyframes die{
+				from{}
+				to{}
+			}*/
+		</style>
+	</head>
+	<body style="overflow: hidden;background: black;">
+		<div class="gameuser">
+			<div>
+				<input type="button" value="简单模式" id = "putong"/>
+				<input type="button" value="普通模式"/>
+				<input type="button" value="困难模式"/>
+				<input type="button" value="地狱模式"/>
+			</div>
+		</div>
+		<div class="bgji">
+			<div class = "bgimg">
+				<div class="bg" id="bg2"></div>
+				<div class="bg"></div>
+			</div>
+		</div>
+		<video src="img/enemy3_down.mp3" loop="1" id="dijidiemusic"></video>
+		<video src="img/game_over.mp3" loop="1" id="zijiadiemusic"></video>
+		<script type="text/javascript">
+			/* 飞机大战构思：
+			 * 要飞机  敌机  地图
+			 * 飞机的动态  敌机的动态    地图的样式
+			 * 飞机的移动和攻击方式   敌机的移动和攻击方式
+			 * 死亡方式
+			 */
+			var num = 0; // 纪录敌机的死亡数量
+			var shengming ;  // 获取每一个血条
+			var span = null; // 放的是子弹
+			var diji = null;
+			var key1 = true; // 子弹不具备穿透效果
+			var maps;    // 地图
+			var dijis;	  // 敌机
+			var dijibul; //敌机子弹的集合
+			var feijis;		// 自己的飞机
+			var dijitime;  // 敌机的计时器
+			var zidantime; // 子弹的计时器
+			var ji;   //所有飞机的父类
+			var vidzidan; // 发生子弹的声音
+			var gamevid; // 游戏的深渊
+			var gift = null; // 击落敌机时随机生成的奖励的集合
+			var zijiadiemusic = document.getElementById("zijiadiemusic");
+			var dijidiemusic = document.getElementById("dijidiemusic");
+			var bg2 = document.getElementById("bg2");
+			var bgnum = document.getElementsByClassName("bg");
+			var bgdiv = document.getElementsByClassName("bgimg")[0]; 
+			var gamediv = document.getElementsByClassName("bgji")[0];// baji是包含所有的游戏元素
+			var gameuser = document.getElementsByClassName("gameuser")[0]
+//			var putong = document.getElementById("putong");
+			var moshi = document.getElementsByTagName("input");
+			var num = 0;  // 0-3 第几个地图
+			var moshinum = ["bg","bg1","bg2","bg3"]; // 背景地图
+			var nandu = [7,14,24,40]; // 敌机随机的数量
+			var speed = [14,20,30,45]; // 一次移动的px
+			var nandus = 0;  // 接收后的敌机随机的数量
+			var speeds = 0;  // 接收后一次移动的px
+			for(var i = 0;i < moshi.length;i++){
+				moshi[i].onclick = function(){
+					gameuser.style.display = "none";
+					gamediv.style.display = "block";
+					switch(this.value){
+						case "简单模式":
+						num = 0;
+						break;
+						case "普通模式":
+						num = 1;
+						break;
+						case "困难模式":
+						num = 2;
+						break;
+						case "地狱模式":
+						num = 3;
+						break;
+					}
+					bgnum[0].classList.add(moshinum[num])
+					bgnum[1].classList.add(moshinum[num])
+					nandus = nandu[num];  // 敌机的数量
+					speeds = speed[num]; // 速度
+					init(); // 游戏初始化
+				}
+			}
+			
+//			init();
+			function init(){
+			ji = new Ji();
+			DiJi.prototype = ji;
+			FeiJi.prototype = ji;
+			maps = new Map();
+			maps.create();
+			dijis = new DiJi();
+			dijis.create();
+			dijis.move();
+			dijis.bulmove();
+//			dijis1 = new DiJi();
+//			dijis1.create();
+//			dijis1.move();
+			feijis = new FeiJi();
+			feijis.create();
+			feijis.zidan();
+			gamebgm();
+			dijis.kill()
+			zidanvideo();  // 加载子弹音频
+			bgdiv.scrollTop = bg2.offsetHeight;
+			document.addEventListener("keydown",getkey);
+			setInterval("scroll()",20);
+			cleargift();
+			}
+			function scroll(){
+				bgdiv.scrollTop --;
+				if(bgdiv.scrollTop <=0){
+					bgdiv.scrollTop = bg2.offsetHeight;
+				}
+			}
+			function gamebgm(){
+				gamevid = document.createElement("video");
+				gamevid.loop = "-1";
+				gamevid.src = "img/game_music.mp3";
+				gamevid.autoplay = "autoplay";
+				gamevid.display = "none";
+				document.body.appendChild(gamevid)
+			}
+			function zidanvideo(){
+				vidzidan = document.createElement("video");
+				vidzidan.loop = "-1";
+				vidzidan.src = "img/bullet.mp3";
+				vidzidan.autoplay = "autoplay";
+				vidzidan.display = "none";
+				document.body.appendChild(vidzidan)
+			}
+			function Map(){
+				this.width = 460;
+				this.height = 700;
+				this.map1 = null;
+				this.create = function(){
+					this.map1 = document.createElement("div");
+					this.map1.style.width = this.width + "px";
+					this.map1.style.height = this.height + "px";
+					this.map1.style.position = "absolute"
+					this.map1.style.zindex = "999";
+					this.map1.style.top = 0 + "px";
+					this.map1.style.left = 0 + "px";
+					this.map1.style.overflow = "hidden";
+					this.map1.style.margin = "auto";
+					gamediv.appendChild(this.map1)
+				}
+			}
+			function Ji(){
+				this.width = 60;
+				this.height = 60;
+			}
+			
+			function DiJi(){
+				this.left = 0;
+				this.top = 0;
+				this.diji1 = null; //  敌机的底子
+				this.xue = 60;
+				this.bul = null; // 敌机子弹的底子
+//				this.dijisrc = ["img/enemy_big.png","img/enemy_small.png"] ;
+				this.create = function(){   // 控制数量
+					for(var i = 0;i < Math.round(Math.random() * nandus + 4);i++){
+						this.diji1 = document.createElement("div");
+						this.diji1.style.position = "absolute";
+						this.shengming = document.createElement("div");  // 生成敌机的血条
+						  // 有三格血  
+						this.shengming.classList.add("shengming");  // 对生命值添加样式
+						this.shengming.style.height = 3 + "px";
+						this.shengming.style.background = "red";
+						this.diji1.appendChild(this.shengming);
+						this.diji1.style.transition = "top linear 0.4s ";
+						this.diji1.classList.add("dijiqun");
+//						this.diji1.id = "3";
+						if(num > 20){
+							this.diji1.classList.add("dijiboss");
+							this.shengming.id = "10"; 
+							this.shengming.style.width = 160 + "px";
+							this.left = Math.round(Math.random()*300);
+							num = 0;
+						}
+						else if(Math.random() < 0.4){
+							this.shengming.id = "5"; 
+							this.shengming.style.width = 60 + "px";
+							this.diji1.classList.add("diji");
+						}else if(Math.random() > 0.4){
+							this.shengming.id = "3"; 
+							this.shengming.style.width = 80 + "px";
+							this.diji1.classList.add("diji1");
+						}
+						this.left = Math.round(Math.random()*360);
+						this.top = Math.round(Math.random()*(-540)-120);
+						
+						this.diji1.style.left = this.left + "px";
+						this.diji1.style.top = this.top + "px";
+						maps.map1.appendChild(this.diji1);
+					}
+				}
+				dijiqun = document.getElementsByTagName("dijiqun");
+				this.move = function(){
+//						console.log(dijiqun.length)
+					for(var i = 0;i < dijiqun.length;i++){
+////						var uy = parseInt(dijiqun[i].style.top) + dijis.height >= maps.height - parseInt(feijis.feiji1.style.bottom) - feijis.height;
+//						var dy = parseInt(getComputedStyle(feijis.feiji1).top) + parseInt(getComputedStyle(feijis.feiji1).height) - parseInt(getComputedStyle(dijiqun[i]).top) < 0;
+//						var rx = parseInt(getComputedStyle(feijis.feiji1).left) + parseInt(getComputedStyle(feijis.feiji1).width)- parseInt(getComputedStyle(dijiqun[i]).left) >  0; 
+//						// 飞机在右边的撞
+//						var lx = parseInt(getComputedStyle(feijis.feiji1).left) - parseInt(getComputedStyle(dijiqun[i]).left) +- parseInt(getComputedStyle(dijiqun[i]).width) < 0 ;
+//						var uy = parseInt(getComputedStyle(feijis.feiji1).top) - parseInt(getComputedStyle(dijiqun[i]).top) + parseInt(getComputedStyle(dijiqun[i]).height) < 0;
+////						var lx = parseInt(dijiqun[i].style.left);
+//						if( rx && lx && uy){  // 死亡条件  uy && lx && rx && dy
+//							if(vidzidan.parentNode != null){
+//								vidzidan.parentNode.removeChild(vidzidan);
+//							}
+//							feijis.feiji1.classList.remove("zijia");
+//							zijiadiemusic.play();
+//							feijis.feiji1.classList.add("zijiadie");
+//							clearTimeout(zidantime);
+//							document.removeEventListener("keydown",getkey);
+//							setTimeout(function(){
+//								location = location
+//							},1000)
+//						}
+						if(parseInt(dijiqun[i].style.left) != -999 && dijiqun[i].className.indexOf("dijidie") == -1){
+							if(Math.random()<0.3){ // 敌机生成子弹的概率
+								dijis.buls(dijiqun[i]);
+							}
+							if(dijiqun[i].className.indexOf("dijiboss") != -1){
+								dijiqun[i].style.top = parseInt(dijiqun[i].style.top) + speeds - (speeds/2) +"px";
+							}else if(dijiqun[i].className.indexOf("diji1") != -1){
+								dijiqun[i].style.top = parseInt(dijiqun[i].style.top) + speeds +"px";
+							}else{
+								dijiqun[i].style.top = parseInt(dijiqun[i].style.top) + speeds + 12 +"px"
+							}
+						}
+						if(parseInt(dijiqun[i].style.top) > maps.height + 120){
+							dijiqun[i].style.left = "-999px"; // 如果敌机跑出地图把它移动到left:-999px的位置
+						}
+					}
+					dijitime = setTimeout("dijis.move()",300)
+				}
+				this.kill = function(){
+					for(var i = 0;i < span.length;i++){
+						for(var a = 0;a < dijiqun.length;a++){
+//								console.log(parseInt(span[i].style.top) >= parseInt(dijiqun[a].style.top))
+								if(span[i] != undefined){
+								var lxd = parseInt(getComputedStyle(dijiqun[a]).left)-parseInt(getComputedStyle(span[i]).left) + parseInt(getComputedStyle(span[i]).width)  <  parseInt(getComputedStyle(span[i]).width)/2 + 14;  
+								// 子弹命中判定
+								var uy = parseInt(getComputedStyle(dijiqun[a]).top) - parseInt(getComputedStyle(span[i]).top) +parseInt(getComputedStyle(span[i]).height)  < 0 ;
+								var rxd = parseInt(getComputedStyle(dijiqun[a]).left)+parseInt(getComputedStyle(dijiqun[a]).width)-parseInt(getComputedStyle(span[i]).left) > 0;
+								if(parseInt(getComputedStyle(span[i]).top) <= parseInt(dijiqun[a].style.top) && lxd && rxd && uy){
+										shengming[a].id = parseInt(shengming[a].id) - 1; // 敌机死亡条件
+										shengming[a].style.width = parseInt(shengming[a].style.width) -  parseInt(shengming[a].style.width)/parseInt(shengming[a].id) + "px"
+//									console.log(getComputedStyle(span[i]).width)
+	//							console.log(dijiqun[a]);
+									if(key1){
+										span[i].parentNode.removeChild(span[i]);
+									}
+									if(parseInt(shengming[a].id) <= 0.1){  // 当生命值为0时  ID是代表的生命值
+										num++;
+										dijiqun[a].classList.remove("diji"); // 移除现在飞机的样式：让他的飞机图片消失
+										dijidiemusic.play();
+										if(Math.random()<0.1){   // 产生道具的概率
+											gift1 = document.createElement("div");
+											gift1.classList.add("gift");
+											gift1.classList.remove("gift2");
+											gift1.classList.add("gift1");
+											gift1.innerHTML = "冰";
+											gift1.style.top = parseInt(dijiqun[a].style.top) + dijis.width/4 + "px";
+											gift1.style.left = parseInt(dijiqun[a].style.left) + dijis.height/4 + "px";
+											maps.map1.appendChild(gift1);
+										}else if(Math.random()>0.8){
+											gift2 = document.createElement("div");
+											gift2.classList.add("gift");
+											gift2.classList.remove("gift1");
+											gift2.classList.add("gift2");
+											gift2.innerHTML = "穿";
+											gift2.style.top = parseInt(dijiqun[a].style.top) + dijis.width/4 + "px";
+											gift2.style.left = parseInt(dijiqun[a].style.left) + dijis.height/4 + "px";
+											maps.map1.appendChild(gift2);
+										}
+//										dijiqun[a].classList.remove("dijiqun");
+										dijiqun[a].classList.add("dijidie"); // 给一个类名
+										
+										dijisi(a); // 确认被击中要移除
+//											console.log(key1);
+									}
+								}
+	//								a--;
+							}
+						
+						}
+						if(span[i] != undefined){
+							if(parseInt(span[i].style.top) <= 0){
+								span[i].parentNode.removeChild(span[i]);
+							}
+						}
+					}
+					var count = 0;
+					for(var c = 0;c <dijiqun.length;c++){
+						if(dijiqun[c].style.left == "-999px"){  // 判断如果所有的敌机的left都等于-999px
+							count++;
+						}
+						if(count >= dijiqun.length){  // 全等于之后开始移除
+							for(var b = 0;b < dijiqun.length;b++){
+								dijiqun[b].parentNode.removeChild(dijiqun[b])
+								b--;  // 因为移除会改变length值所以要b--
+							}
+							dijis.create()  // 生成新的敌机
+						}
+					}
+					for(var i = 0;i < dijiqun.length;i++){
+						if(dijiqun != undefined){
+	//						var uy = parseInt(dijiqun[i].style.top) + dijis.height >= maps.height - parseInt(feijis.feiji1.style.bottom) - feijis.height;
+							var uy = (parseInt(getComputedStyle(feijis.feiji1).top) + parseInt(getComputedStyle(feijis.feiji1).height)) - parseInt(getComputedStyle(dijiqun[i]).top) > 0;
+							var rx = parseInt(getComputedStyle(feijis.feiji1).left) + (parseInt(getComputedStyle(feijis.feiji1).width)- parseInt(getComputedStyle(dijiqun[i]).left)) > 0; 
+							// 飞机在右边的撞
+							var lx = parseInt(getComputedStyle(feijis.feiji1).left) - (parseInt(getComputedStyle(dijiqun[i]).left) + parseInt(getComputedStyle(dijiqun[i]).width)) <0;
+							var dy = parseInt(getComputedStyle(feijis.feiji1).top) - (parseInt(getComputedStyle(dijiqun[i]).top) + parseInt(getComputedStyle(dijiqun[i]).height)) < 0;
+	//						var lx = parseInt(dijiqun[i].style.left);
+							if(uy && dy && lx && rx){  // 死亡条件  uy && lx && rx && dy
+								die();
+							}
+						}
+					}
+					setTimeout("dijis.kill()",60)
+				}
+				this.buls = function(di){  // 调用时进行传参
+					var di = getComputedStyle(di);
+					this.bul = document.createElement("div");
+					this.bul.classList.add("bul");
+					this.bul.style.position = "absolute";
+					this.bul.style.transition = "top linear 0.2s";
+					this.bul.style.top = parseFloat(di.top) + parseFloat(di.height) + "px";
+					this.bul.style.left = parseFloat(di.left) + parseFloat(di.width)/2 -7+ "px";
+					maps.map1.appendChild(this.bul);
+				}
+				this.bulmove = function(){
+					dijibul = document.getElementsByClassName("bul");
+					if(dijibul != undefined){
+						for(var i = 0;i < dijibul.length;i++){
+							var lx = parseInt(getComputedStyle(dijibul[i]).left) - (parseInt(getComputedStyle(feijis.feiji1).left) + parseInt(getComputedStyle(feijis.feiji1).width)) < 0;
+							var rx = (parseInt(getComputedStyle(dijibul[i]).left) + parseInt(getComputedStyle(dijibul[i]).width)) - parseInt(getComputedStyle(feijis.feiji1).left) > 0;
+							var dy = parseInt(getComputedStyle(dijibul[i]).top) - (parseInt(getComputedStyle(feijis.feiji1).height) + parseInt(getComputedStyle(feijis.feiji1).top)) < 0;
+							var uy = (parseInt(getComputedStyle(dijibul[i]).top) + parseInt(getComputedStyle(dijibul[i]).height)) - parseInt(getComputedStyle(feijis.feiji1).top) > 0;
+							dijibul[i].style.top = parseInt(dijibul[i].style.top) + speeds + 12 + "px";
+							if(uy && dy && lx && rx){
+								die();
+								dijibul[i].parentNode.removeChild(dijibul[i]);// 清除命中后的子弹
+							}
+						}
+					}
+					
+					setTimeout("dijis.bulmove()",100);
+				}
+			}
+			function FeiJi(){
+				this.zidantype = "zidan";
+				this.giftnum = "zijia";
+				this.px = 7;
+				this.bottom = 40;
+				this.left = 200;
+				this.feiji1 = document.createElement("div");
+				this.feiji1.classList.add(this.giftnum);
+				this.feiji1.style.width = this.width + "px";
+				this.feiji1.style.height = this.height + "px";
+//				this.feiji1.style.border = "1px solid blue";
+				this.feiji1.style.position = "absolute";
+				this.feiji1.id = "10"; // 飞机的生命值
+				this.shengmingzi = document.createElement("div");
+				this.shengmingzi.style.height = "4px";
+				this.shengmingzi.style.width = "60px";
+				this.shengmingzi.style.background = "blue";
+				this.shengmingzi.style.position = "absolute";
+				this.shengmingzi.style.top = parseInt(this.feiji1.style.height) - parseInt(this.shengmingzi.style.height) + "px";
+//				this.zd = null;
+				maps.map1.appendChild(this.feiji1);
+				this.feiji1.appendChild(this.shengmingzi);
+				this.create = function(){
+				this.feiji1.style.left = this.left + "px";
+				this.feiji1.style.bottom = this.bottom + "px";
+				}
+				this.move = function(kcode){
+					switch(kcode){
+						case 38: // 上
+//						console.log("上")
+						this.bottom = this.bottom + 10;
+						break;
+						case 40:  // 下
+//						console.log("下")
+						if(parseInt(feijis.feiji1.style.bottom) >= 0){
+							this.bottom = this.bottom - 10;
+						}
+						break;
+						case 37:  // 左
+//						console.log("左")
+						if(parseInt(feijis.feiji1.style.left) >= 0){
+						this.left = this.left - 10;
+						}
+						break;
+						case 39:   // 右
+//						console.log("右")
+						if(parseInt(feijis.feiji1.style.left) <= maps.width - feijis.width){
+						this.left = this.left + 10;
+						}
+						break;
+					}
+//					{
+//						feijis.feiji1.style.bottom = 0 + "px";
+//					}
+					gift = document.getElementsByClassName("gift");
+					for(var i = 0;i < gift.length;i++){   // 判断飞机是否吃到了gift
+						var lx = parseInt(getComputedStyle(feijis.feiji1).left) - parseInt(getComputedStyle(gift[i]).left) < 0;//子弹的left
+						var rx = parseInt(getComputedStyle(feijis.feiji1).left) + parseInt(getComputedStyle(feijis.feiji1).width) - parseInt(getComputedStyle(gift[i]).left) > 0;
+						var dy = parseInt(getComputedStyle(feijis.feiji1).top) - parseInt(getComputedStyle(gift[i]).top)  < 0;
+						var uy =parseInt(getComputedStyle(feijis.feiji1).top) - parseInt(getComputedStyle(gift[i]).top) > 0 ;
+						if(lx && rx && dy){
+							if(gift[i].className.indexOf("gift2") !== -1){
+								feijis.zidantype = "zidan";
+								feijis.px = 5;
+								key1 = false;
+							}else{
+								feijis.zidantype = "zidan1";
+								feijis.px = 18;
+								key1 = true;
+							}
+							gift[i].parentNode.removeChild(gift[i]);
+						}
+					}
+					this.create();
+				}
+				this.zidan = function(){
+					shengming = document.getElementsByClassName("shengming");
+					this.zdx = this.left + this.width/2 - this.px ;
+					this.zdy = maps.height - this.bottom - this.height/ 2 - 28;
+					this.zd = document.createElement("span");  // 生成一个span来放子弹
+					span = document.getElementsByTagName("span"); // 再把所以的span选起来
+					dijiqun = document.getElementsByClassName("dijiqun");
+//					console.log(span)
+					maps.map1.appendChild(this.zd); // 把子弹添加到地图中
+					this.zd.classList.add(this.zidantype);
+//					this.zd.className =this.zidantype;
+					this.zd.style.position = "absolute";
+					this.zd.style.top  = this.zdy + "px";
+					this.zd.style.left = this.zdx +"px";
+					this.zd.style.transition = "all 0.2s";
+					for(var i = 0;i < span.length;i++){
+						span[i].style.top = parseInt(getComputedStyle(span[i]).top) - 36 + "px";
+					}
+					zidantime = setTimeout("feijis.zidan()",100);
+				}
+			}
+			function getkey(e){
+				var e = e || event;
+//				console.log(e.keyCode);
+				feijis.move(e.keyCode); //上38下40右39左37
+			}
+			function dijisi(c){
+//				console.log(c)
+				setTimeout(function(){
+					if(dijiqun[c] !== undefined){
+							dijiqun[c].style.left = -999 + "px";  // 如果被击中先将它移到我看不到的地方
+							dijiqun[c].style.height = 9999 + "px";
+						}
+					},200)
+			}
+			function cleargift(){
+				setInterval(function(){
+					if(gift != null){
+					for(var i = 0;i < gift.length;i++){
+						gift[i].parentNode.removeChild(gift[i])
+					}
+					}
+				},10000)
+			}
+			function die(){  // 被攻击时调用
+//				console.log(feijis.feiji1.id);
+					feijis.feiji1.id = parseInt(feijis.feiji1.id) - 1;
+					feijis.shengmingzi.style.width = parseFloat(feijis.shengmingzi.style.width) - (parseFloat(feijis.shengmingzi.style.width)/parseFloat(feijis.feiji1.id)) + "px";
+					if(parseInt(feijis.feiji1.id)<=0){
+						if(vidzidan.parentNode != null){
+							vidzidan.parentNode.removeChild(vidzidan);
+						}
+						feijis.feiji1.classList.remove("zijia");
+						zijiadiemusic.play();
+						feijis.feiji1.classList.add("zijiadie");
+						clearTimeout(zidantime);
+						document.removeEventListener("keydown",getkey);
+						setTimeout(function(){
+							location = location
+					},600)
+					}
+			}
+		</script>
+	</body>
+</html>

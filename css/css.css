@@ -1,0 +1,68 @@
+.gameuser{
+    width: 460px;
+    height: 700px;
+    margin: auto;
+    overflow: hidden;
+    background: url(img/bg0.jpg);
+}
+.gameuser>div{
+    width: 300px;
+    height: 500px;
+    margin:100px auto;
+    overflow: hidden;
+}
+.gameuser>div>input{
+    width: 180px;
+    height: 50px;
+    display: block;
+    margin:60px auto;
+    font:bold 24px "微软雅黑";
+}
+.gameuser>div>input:nth-of-type(1){
+    background: rgba(66,201,20,0.4);
+}
+.bgji{
+    width: 460px;
+    height: 700px;
+    overflow:hidden;
+    position: relative;
+    margin: auto;
+    z-index: -1;
+    display: none;
+
+}
+.bg{
+    background: url(img/bg3.jpg);
+    background-size:100% 100%;
+    width: 460px;
+    height: 700px;
+}
+.bgimg{
+    width: 460px;
+    height: 700px;
+    overflow:hidden;
+    position: absolute;
+    margin: auto;
+    z-index: -1;
+}
+.diji{
+    background: url(img/enemy_small.png);
+    background-size:100% 100%;
+}
+.dijidie{
+    background: url(img/boom_small.png);
+    background-size:100% 100%;
+}
+.zijia{
+    background: url(img/plane_0.png);
+    background-size:100% 100%;
+}
+/*自己的飞机*/
+.zijiadie{
+    background: url(img/boom_big.png);
+    background-size:100% 100%;
+}
+.zidan{
+    background: url(img/fire.png);
+    background-size:100% 100%;
+}
